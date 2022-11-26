@@ -5,19 +5,19 @@ use relative_path::RelativePathBuf;
 use serde::de::{Deserializer, Visitor, Error};
 use serde::Deserialize;
 
-use crate::schemas::Artifact;
+use crate::schemas::PathRecord;
 
 /// An entry in the file list.
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
-pub enum FLEntry<A> where A: Artifact + Default {
+pub enum FLEntry<A> where A: PathRecord + Default {
   /// An entry may be a bare filename.
   Bare(RelativePathBuf),
   /// An entry may be a mapping from a string to some path data.
   Mapped(SingleMap<A>),
 }
 
-impl <A: Artifact + Default> FLEntry<A> {
+impl <A: PathRecord + Default> FLEntry<A> {
   pub fn to_artifact(self) -> A {
     match self {
       FLEntry::Bare(path) => {
@@ -33,11 +33,11 @@ impl <A: Artifact + Default> FLEntry<A> {
 /// Single-entry map type for map-style dep and output info.
 #[derive(Debug)]
 #[repr(transparent)]
-pub struct SingleMap<A> where for<'a> A: Artifact + Default {
+pub struct SingleMap<A> where for<'a> A: PathRecord + Default {
   pub artifact: A,
 }
 
-impl <'de, A> Deserialize<'de> for SingleMap<A> where A: Artifact + Default + Deserialize<'de> {
+impl <'de, A> Deserialize<'de> for SingleMap<A> where A: PathRecord + Default + Deserialize<'de> {
   fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
       where
           D: Deserializer<'de> {
@@ -48,11 +48,11 @@ impl <'de, A> Deserialize<'de> for SingleMap<A> where A: Artifact + Default + De
   }
 }
 
-struct SMV<A> where A: Artifact + Default {
+struct SMV<A> where A: PathRecord + Default {
   _ph: PhantomData<A>
 }
 
-impl <'de, A> Visitor<'de> for SMV<A> where A: Artifact + Default + Deserialize<'de> {
+impl <'de, A> Visitor<'de> for SMV<A> where A: PathRecord + Default + Deserialize<'de> {
   type Value = A;
 
   fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {

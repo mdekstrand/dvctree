@@ -1,7 +1,7 @@
 use relative_path::{RelativePath, RelativePathBuf};
 use serde::Deserialize;
 
-use super::Artifact;
+use super::PathRecord;
 
 /// Representation of a dependency file.
 #[derive(Debug, Default, Clone, Deserialize)]
@@ -13,7 +13,7 @@ pub struct DepFile {
   pub size: Option<usize>,
 }
 
-impl Artifact for DepFile {
+impl PathRecord for DepFile {
   fn path(&self) -> &RelativePath {
     &self.path
   }

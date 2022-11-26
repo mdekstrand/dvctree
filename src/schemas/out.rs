@@ -1,6 +1,6 @@
 use relative_path::{RelativePathBuf, RelativePath};
 use serde::Deserialize;
-use super::Artifact;
+use super::PathRecord;
 
 /// Representation of an output file.
 #[derive(Debug, Clone, Deserialize)]
@@ -18,7 +18,7 @@ impl Default for OutFile {
   }
 }
 
-impl Artifact for OutFile {
+impl PathRecord for OutFile {
   fn path(&self) -> &RelativePath {
     &self.path
   }

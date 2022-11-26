@@ -13,7 +13,7 @@ pub use pipeline::Pipeline;
 use relative_path::RelativePath;
 
 /// Traits implemented by DVC artifacts.
-pub trait Artifact {
+pub trait PathRecord {
   /// Get the path of this artifact (as stored).
   fn path(&self) -> &RelativePath;
 
