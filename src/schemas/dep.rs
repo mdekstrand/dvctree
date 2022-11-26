@@ -1,7 +1,7 @@
 use relative_path::{RelativePath, RelativePathBuf};
 use serde::Deserialize;
 
-use crate::interpolate::{Interpolatable, InterpContext};
+use crate::interpolate::{Interpolatable, InterpContext, InterpError};
 
 use super::PathRecord;
 
@@ -30,9 +30,9 @@ impl PathRecord for DepFile {
 }
 
 impl Interpolatable for DepFile {
-  fn interpolate(&self, context: &InterpContext<'_>) -> DepFile {
+  fn interpolate(&self, context: &InterpContext<'_>) -> Result<DepFile, InterpError> {
     let mut dep = self.clone();
-    dep.path = self.path.interpolate(context);
-    dep
+    dep.path = self.path.interpolate(context)?;
+    Ok(dep)
   }
 }

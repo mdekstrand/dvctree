@@ -1,9 +1,10 @@
 //! Support for rendering pipeline elements.
 use std::collections::HashMap;
 
+use crate::DVCError;
 use crate::{schemas::pipeline::{StageEntry, PipelineStage}, interpolate::{InterpContext, Interpolatable}};
 
-pub fn expand_entries(specs: &HashMap<String,StageEntry>) -> HashMap<String, PipelineStage> {
+pub fn expand_entries(specs: &HashMap<String,StageEntry>) -> Result<HashMap<String, PipelineStage>, DVCError>  {
   let mut out = HashMap::new();
 
   for (name, entry) in specs {
@@ -17,12 +18,12 @@ pub fn expand_entries(specs: &HashMap<String,StageEntry>) -> HashMap<String, Pip
           let mut map = HashMap::new();
           map.insert("item", label.as_str());
           let ctx = InterpContext::create(&map);
-          let stage = stage.interpolate(&ctx);
+          let stage = stage.interpolate(&ctx)?;
           out.insert(key, stage);
         }
       },
     }
   }
 
-  out
+  Ok(out)
 }

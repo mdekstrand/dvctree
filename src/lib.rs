@@ -26,11 +26,19 @@ pub enum DVCError {
   Parse(#[from] serde_yaml::Error),
   #[error("invalid path encountered")]
   BadPath,
+  #[error("template references invalid key")]
+  InvalidTemplate,
 }
 
 impl From<relative_path::FromPathError> for DVCError {
   fn from(_: relative_path::FromPathError) -> Self {
     DVCError::BadPath
+  }
+}
+
+impl From<text_template::TemplateError> for DVCError {
+  fn from(_: text_template::TemplateError) -> Self {
+    DVCError::InvalidTemplate
   }
 }
 
@@ -98,7 +106,7 @@ impl DVCTree {
   }
 
   /// Extract all of the DVC-managed outputs from the tree.
-  pub fn outputs(&self) -> Vec<DVCOutput> {
+  pub fn outputs(&self) -> Result<Vec<DVCOutput>, DVCError> {
     let mut outs = Vec::new();
 
     for file in &self.dvcfiles {
@@ -120,9 +128,9 @@ impl DVCTree {
         Some(p) => p.to_relative_path_buf(),
         None => ".".into(),
       };
-      for (_name, stage) in expand_entries(&pipe.spec.stages) {
+      for (_name, stage) in expand_entries(&pipe.spec.stages)? {
         let wdir = stage.wdir.map(|p| pipedir.join_normalized(p)).unwrap_or_else(|| pipedir.clone());
-        for out in &stage.outs {
+        for out in stage.outs.iter().chain(stage.metrics.iter()) {
           let path = wdir.join_normalized(&out.path);
           outs.push(DVCOutput {
             path,
@@ -134,6 +142,6 @@ impl DVCTree {
       }
     }
 
-    outs
+    Ok(outs)
   }
 }

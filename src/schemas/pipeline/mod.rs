@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use serde::Deserialize;
 use serde::de::Deserializer;
 
-use crate::interpolate::{Interpolatable, InterpContext};
+use crate::interpolate::{Interpolatable, InterpContext, InterpError};
 
 use super::{DepFile, OutFile};
 
@@ -27,7 +27,7 @@ pub enum StageEntry {
   }
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Default, Deserialize)]
 pub struct PipelineStage {
   pub cmd: String,
   #[serde(default)]
@@ -41,14 +41,21 @@ pub struct PipelineStage {
 }
 
 impl Interpolatable for PipelineStage {
-  fn interpolate(&self, context: &InterpContext<'_>) -> Self::Owned {
-    PipelineStage {
-      cmd: context.interpolate(&self.cmd),
-      wdir: self.wdir.as_ref().map(|s| context.interpolate(s.as_str())),
-      deps: self.deps.iter().map(|d| d.interpolate(context)).collect(),
-      outs: self.outs.iter().map(|d| d.interpolate(context)).collect(),
-      metrics: self.metrics.iter().map(|d| d.interpolate(context)).collect(),
+  fn interpolate(&self, context: &InterpContext<'_>) -> Result<Self::Owned, InterpError>  {
+    let mut stage = PipelineStage::default();
+    stage.cmd = context.interpolate(&self.cmd)?;
+    stage.wdir = self.wdir.as_ref().map(|s| context.interpolate(s.as_str())).transpose()?;
+    for dep in &self.deps {
+      stage.deps.push(dep.interpolate(context)?);
     }
+    for out in &self.outs {
+      stage.outs.push(out.interpolate(context)?);
+    }
+    for metric in &self.metrics {
+      stage.metrics.push(metric.interpolate(context)?);
+    }
+
+    Ok(stage)
   }
 }
 
