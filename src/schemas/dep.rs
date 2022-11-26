@@ -1,6 +1,8 @@
 use relative_path::{RelativePath, RelativePathBuf};
 use serde::Deserialize;
 
+use crate::interpolate::{Interpolatable, InterpContext};
+
 use super::PathRecord;
 
 /// Representation of a dependency file.
@@ -24,5 +26,13 @@ impl PathRecord for DepFile {
 
   fn md5(&self) -> Option<&str> {
     self.md5.as_ref().map(|s| s.as_str())
+  }
+}
+
+impl Interpolatable for DepFile {
+  fn interpolate(&self, context: &InterpContext<'_>) -> DepFile {
+    let mut dep = self.clone();
+    dep.path = self.path.interpolate(context);
+    dep
   }
 }

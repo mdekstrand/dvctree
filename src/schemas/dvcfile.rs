@@ -1,3 +1,4 @@
+use relative_path::RelativePathBuf;
 use serde::Deserialize;
 
 use super::DepFile;
@@ -12,6 +13,8 @@ use super::OutFile;
 /// repositories with such files.
 #[derive(Debug, Clone, Deserialize)]
 pub struct SingleStage {
+  #[serde(default)]
+  pub wdir: Option<RelativePathBuf>,
   #[serde(default)]
   pub md5: Option<String>,
   #[serde(default)]

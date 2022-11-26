@@ -1,5 +1,7 @@
 use relative_path::{RelativePathBuf, RelativePath};
 use serde::Deserialize;
+use crate::interpolate::{Interpolatable, InterpContext};
+
 use super::PathRecord;
 
 /// Representation of an output file.
@@ -29,5 +31,13 @@ impl PathRecord for OutFile {
 
   fn md5(&self) -> Option<&str> {
     self.md5.as_ref().map(|s| s.as_str())
+  }
+}
+
+impl Interpolatable for OutFile {
+  fn interpolate(&self, context: &InterpContext<'_>) -> OutFile {
+    let mut out = self.clone();
+    out.path = self.path.interpolate(context);
+    out
   }
 }

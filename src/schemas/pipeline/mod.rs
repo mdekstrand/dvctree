@@ -2,6 +2,8 @@ use std::collections::HashMap;
 use serde::Deserialize;
 use serde::de::Deserializer;
 
+use crate::interpolate::{Interpolatable, InterpContext};
+
 use super::{DepFile, OutFile};
 
 mod filelist;
@@ -36,6 +38,18 @@ pub struct PipelineStage {
   pub outs: Vec<OutFile>,
   #[serde(deserialize_with="deserialize_outs", default)]
   pub metrics: Vec<OutFile>,
+}
+
+impl Interpolatable for PipelineStage {
+  fn interpolate(&self, context: &InterpContext<'_>) -> Self::Owned {
+    PipelineStage {
+      cmd: context.interpolate(&self.cmd),
+      wdir: self.wdir.as_ref().map(|s| context.interpolate(s.as_str())),
+      deps: self.deps.iter().map(|d| d.interpolate(context)).collect(),
+      outs: self.outs.iter().map(|d| d.interpolate(context)).collect(),
+      metrics: self.metrics.iter().map(|d| d.interpolate(context)).collect(),
+    }
+  }
 }
 
 fn deserialize_deps<'de, D>(de: D) -> Result<Vec<DepFile>, D::Error> where D: Deserializer<'de> {
