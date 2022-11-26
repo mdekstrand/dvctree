@@ -28,12 +28,13 @@ pub enum StageEntry {
 #[derive(Debug, Clone, Deserialize)]
 pub struct PipelineStage {
   pub cmd: String,
+  #[serde(default)]
   pub wdir: Option<String>,
-  #[serde(deserialize_with="deserialize_deps")]
+  #[serde(deserialize_with="deserialize_deps", default)]
   pub deps: Vec<DepFile>,
-  #[serde(deserialize_with="deserialize_outs")]
+  #[serde(deserialize_with="deserialize_outs", default)]
   pub outs: Vec<OutFile>,
-  #[serde(deserialize_with="deserialize_outs")]
+  #[serde(deserialize_with="deserialize_outs", default)]
   pub metrics: Vec<OutFile>,
 }
 

@@ -1,6 +1,7 @@
 //! Parsing support for a list of files in a pipeline.
 use std::marker::PhantomData;
 
+use relative_path::RelativePathBuf;
 use serde::de::{Deserializer, Visitor, Error};
 use serde::Deserialize;
 
@@ -11,7 +12,7 @@ use crate::schemas::Artifact;
 #[serde(untagged)]
 pub enum FLEntry<A> where A: Artifact + Default {
   /// An entry may be a bare filename.
-  Bare(String),
+  Bare(RelativePathBuf),
   /// An entry may be a mapping from a string to some path data.
   Mapped(SingleMap<A>),
 }
@@ -62,7 +63,7 @@ impl <'de, A> Visitor<'de> for SMV<A> where A: Artifact + Default + Deserialize<
       where
           M: serde::de::MapAccess<'de>, {
     let entry = if let Some((name, entry)) = map.next_entry()? {
-      let name: String = name;
+      let name: RelativePathBuf = name;
       let mut entry: A = entry;
       entry.set_path(&name);
       entry

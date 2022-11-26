@@ -11,8 +11,11 @@ use super::OutFile;
 /// same, there should be no problem with using `dvcfile` for basic reading of
 /// repositories with such files.
 #[derive(Debug, Clone, Deserialize)]
-pub struct DvcFile {
+pub struct SingleStage {
+  #[serde(default)]
   pub md5: Option<String>,
+  #[serde(default)]
   pub outs: Vec<OutFile>,
+  #[serde(default)]
   pub deps: Vec<DepFile>,
 }

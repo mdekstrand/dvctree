@@ -6,7 +6,7 @@ use super::{OutFile, DepFile};
 
 /// Schema for a DVC lockfile.
 #[derive(Debug, Clone, Deserialize)]
-pub struct LockFile {
+pub struct LockState {
   pub schema: String,
   pub stages: HashMap<String, LockStage>,
 }

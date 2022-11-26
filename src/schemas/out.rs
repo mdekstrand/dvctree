@@ -1,3 +1,4 @@
+use relative_path::{RelativePathBuf, RelativePath};
 use serde::Deserialize;
 use super::Artifact;
 
@@ -5,7 +6,7 @@ use super::Artifact;
 #[derive(Debug, Clone, Deserialize)]
 #[serde(default)]
 pub struct OutFile {
-  pub path: String,
+  pub path: RelativePathBuf,
   pub cache: bool,
   pub md5: Option<String>,
   pub size: Option<usize>,
@@ -18,12 +19,12 @@ impl Default for OutFile {
 }
 
 impl Artifact for OutFile {
-  fn path(&self) -> &str {
+  fn path(&self) -> &RelativePath {
     &self.path
   }
 
-  fn set_path(&mut self, path: &str) {
-    self.path = path.into();
+  fn set_path(&mut self, path: &RelativePath) {
+    self.path = path.to_owned();
   }
 
   fn md5(&self) -> Option<&str> {
