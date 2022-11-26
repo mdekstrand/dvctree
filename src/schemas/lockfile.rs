@@ -15,6 +15,8 @@ pub struct LockState {
 #[derive(Debug, Clone, Deserialize)]
 pub struct LockStage {
   pub cmd: String,
+  #[serde(default)]
   pub deps: Vec<DepFile>,
+  #[serde(default)]
   pub outs: Vec<OutFile>,
 }

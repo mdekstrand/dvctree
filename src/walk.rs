@@ -4,7 +4,7 @@ use std::collections::LinkedList;
 use std::io;
 use std::fs::{read_dir, File};
 
-use relative_path::RelativePathBuf;
+use log::*;
 use serde_yaml::from_reader;
 
 use crate::schemas::{SingleStage, Pipeline, LockState};
@@ -47,17 +47,21 @@ pub enum Src {
 }
 
 fn maybe_load(path: &Path) -> Result<Option<(PathBuf, Src)>, DVCError> {
+  trace!("scanning {}", path.display());
   if let Some(name) = path.file_name() {
     let name = name.to_str().ok_or(DVCError::BadPath)?;
     if name == "dvc.yaml" {
+      debug!("loading pipeline from {}", path.display());
       let read = File::open(path)?;
       let data = from_reader(read)?;
       Ok(Some((path.to_owned(), Src::Pipe(data))))
     } else if name == "dvc.lock" {
+      debug!("loading lockfile from {}", path.display());
       let read = File::open(path)?;
       let data = from_reader(read)?;
       Ok(Some((path.to_owned(), Src::Lock(data))))
     } else if name.ends_with(".dvc") {
+      debug!("loading single stage from {}", path.display());
       let read = File::open(path)?;
       let data = from_reader(read)?;
       Ok(Some((path.to_owned(), Src::Single(data))))
